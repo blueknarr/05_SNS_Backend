@@ -10,6 +10,21 @@ from user.utils.utils import create_jwt_pair_for_user
 User = get_user_model()
 
 
+class UserView(APIView):
+    def delete(self, request):
+        try:
+            user = User.object.get(email=request.data['email'])
+            user.delete()
+
+            return Response({
+                'message': '회원 탈퇴가 완료되었습니다.'
+            }, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response({
+                'message': '해당하는 유저가 없습니다.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+
 class UserLoginView(APIView):
     def post(self, request):
         user = authenticate(email=request.data['email'], password=request.data['password'])
