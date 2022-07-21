@@ -1,4 +1,4 @@
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, get_user_model
 from django.shortcuts import render
 from rest_framework import status
 from rest_framework.response import Response
@@ -7,8 +7,10 @@ from rest_framework.views import APIView
 from user.serializers import UserCreateSerializer
 from user.utils.utils import create_jwt_pair_for_user
 
+User = get_user_model()
 
-class UserView(APIView):
+
+class UserLoginView(APIView):
     def post(self, request):
         user = authenticate(email=request.data['email'], password=request.data['password'])
 
