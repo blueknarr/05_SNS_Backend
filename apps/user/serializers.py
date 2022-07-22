@@ -11,7 +11,7 @@ class UserCreateSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
     def validated_email(self, email):
-        get_user = User.object.filter(email__iexact=email)
+        get_user = User.objects.filter(email__iexact=email)
 
         if get_user.count() > 0:
             raise serializers.ValidationError(
@@ -20,7 +20,7 @@ class UserCreateSerializer(serializers.Serializer):
         return email
 
     def validate_user_name(self, user_name):
-        get_user = User.object.filter(user_name__iexact=user_name)
+        get_user = User.objects.filter(user_name__iexact=user_name)
 
         if get_user.count() > 0:
             raise serializers.ValidationError(
@@ -34,7 +34,7 @@ class UserCreateSerializer(serializers.Serializer):
         return data
 
     def create(self, valid_data):
-        user = User.object.create_user(
+        user = User.objects.create_user(
             email=valid_data['email'],
             user_name=valid_data['user_name'],
             password=valid_data['password']
