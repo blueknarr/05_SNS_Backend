@@ -1,6 +1,7 @@
 from django.contrib.auth import authenticate, get_user_model
 from django.shortcuts import render
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -11,9 +12,11 @@ User = get_user_model()
 
 
 class UserView(APIView):
+    permission_classes = (IsAuthenticated,)
+
     def delete(self, request):
         try:
-            user = User.object.get(email=request.data['email'])
+            user = User.objects.get(email=request.data['email'])
             user.delete()
 
             return Response({
