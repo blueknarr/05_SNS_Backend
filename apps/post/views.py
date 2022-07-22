@@ -5,13 +5,11 @@ from rest_framework.views import APIView
 from rest_framework import status
 
 from post.models import Post
-from post.serializers import PostCreateSerializer
 from post.utils.utils import get_user_id_from_token
 from user.models import User
 
 
 class PostCreateView(APIView):
-    serializer_class = PostCreateSerializer
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
