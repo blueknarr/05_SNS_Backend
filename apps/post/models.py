@@ -4,7 +4,7 @@ from user.models import User
 
 # Create your models here.
 class Post(models.Model):
-    user_name = models.ForeignKey(User, on_delete=models.CASCADE)
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField('제목', max_length=100, blank=True)
     content = models.TextField('본문')
     like = models.IntegerField('좋아요', default=0)
