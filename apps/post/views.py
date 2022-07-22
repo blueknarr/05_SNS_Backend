@@ -17,7 +17,7 @@ class PostCreateView(APIView):
     def post(self, request):
         user_id = get_user_id_from_token(request.META['HTTP_AUTHORIZATION'].split()[1])
 
-        if user_id:
+        if user_id == request.user.id:
             user = User.objects.filter(id=user_id).first()
             Post.objects.create(
                 user=user,
