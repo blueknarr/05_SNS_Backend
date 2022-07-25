@@ -1,7 +1,7 @@
 import jwt
 
 from sns.settings import SIMPLE_JWT
-from post.models import Post
+from post.models import Post, PostLike
 
 
 def get_user_id_from_token(token):
@@ -21,3 +21,21 @@ def get_post_detail(post_id):
         post.save()
         return post
     return False
+
+
+def set_post_like_cnt(sel, user_id, post_id):
+    post = Post.objects.get(id=post_id)
+
+    if sel == 'like':
+        post_like, is_liked = PostLike.objects.get_or_create(post=post, user_id=user_id)
+
+        if is_liked:
+            msg = f'{post_id}번 게시글의 좋아요가 눌렸습니다.'
+        else:
+            msg = f'{post_id}번 게시글의 좋아요를 이미 눌렀습니다.'
+    elif sel == 'dislike':
+        post_like = PostLike.objects.filter(post=post).filter(user_id=user_id).first()
+        post_like.delete()
+        msg = f'{post_id}번 게시글의 좋아요를 취소했습니다.'
+
+    return msg

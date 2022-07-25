@@ -14,7 +14,8 @@ from post.serializers import (
 )
 from post.utils.utils import (
     get_user_id_from_token,
-    get_post_detail
+    get_post_detail,
+    set_post_like_cnt,
 )
 
 
@@ -31,7 +32,7 @@ class PostView(APIView):
                 res.append({
                     '제목': row['title'],
                     '작성자': row['writer'],
-                    '해시태그': '',
+                    '해시태그': row['hashtag'],
                     '작성일': row['create_date'],
                     '좋아요': row['like'],
                     '조회수': row['view']
@@ -58,6 +59,7 @@ class PostView(APIView):
 
             if create_serializer.is_valid(raise_exception=True):
                 create_serializer.save()
+                #split_and_insert_hashtag(request.data['hashtag'])
 
                 return Response({
                     'message': '게시글을 등록했습니다.'
@@ -164,3 +166,11 @@ class PostRestoreView(APIView):
             return Response({
                 'message': f'{post_id}번 게시글을 복원 할 수 없습니다.'
             }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PostLikeView(APIView):
+    def post(self, request, post_id):
+        msg = set_post_like_cnt(request.data['sel'], request.user.id, post_id)
+        return Response({
+            'message': msg
+        }, status=status.HTTP_200_OK)
