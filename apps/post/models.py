@@ -1,9 +1,42 @@
+import datetime, pytz
+
 from django.db import models
 from user.models import User
 
 
-# Create your models here.
-class Post(models.Model):
+class SoftDeleteManager(models.Manager):
+    use_for_related_fields = True
+
+    def get_queryset(self):
+        return super().get_queryset().filter(is_deleted=False)
+
+
+class DeletedRecordManager(models.Manager):
+    use_for_related_fields = True
+
+    def get_queryset(self):
+        return super().get_queryset().filter(is_deleted=True)
+
+
+class SoftDeleteModel(models.Model):
+    is_deleted = models.BooleanField(null=True, default=False)
+
+    class Meta:
+        abstract = True
+
+    objects = SoftDeleteManager()
+    deleted_objects = DeletedRecordManager()
+
+    def delete(self, using=None, keep_parents=False):
+        self.is_deleted = True
+        self.save(update_fields=["is_deleted"])
+
+    def restore(self):
+        self.is_deleted = False
+        self.save(update_fields=["is_deleted"])
+
+
+class Post(SoftDeleteModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField('제목', max_length=100, null=False)
     writer = models.CharField('작성자', max_length=20, null=False)
@@ -16,7 +49,7 @@ class Post(models.Model):
     class Meta:
         verbose_name = 'post'
         db_table = 'tb_post'
-        ordering = ('-modify_date',)
+        ordering = ('-create_date',)
 
     def __str__(self):
         return self.title
