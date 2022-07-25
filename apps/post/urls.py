@@ -7,4 +7,5 @@ from post.views import (
 
 urlpatterns = [
     path('', PostView.as_view(), name='post'),
+    path('<int:post_id>', PostView.as_view(), name='post')
 ]

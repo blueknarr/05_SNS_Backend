@@ -16,3 +16,16 @@ class PostCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = ['user', 'title', 'content']
+
+
+class PostPatchSerializer(serializers.ModelSerializer):
+    def update(self, instance, validated_data):
+        instance.title = validated_data['title']
+        instance.content = validated_data['content']
+        instance.save()
+
+        return instance
+
+    class Meta:
+        model = Post
+        fields = ['title', 'content']
