@@ -5,36 +5,36 @@ from rest_framework.views import APIView
 from rest_framework import status
 
 from post.models import Post
+from post.serializers import PostCreateSerializer
 from post.utils.utils import get_user_id_from_token
 from user.models import User
 
 
-class PostCreateView(APIView):
+class PostView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
         user_id = get_user_id_from_token(request.META['HTTP_AUTHORIZATION'].split()[1])
 
         if user_id == request.user.id:
-            user = User.objects.filter(id=user_id).first()
-            Post.objects.create(
-                user=user,
-                writer=user.user_name,
-                **request.data
-            )
+            post_serializer = PostCreateSerializer(
+                data={
+                    'user': user_id,
+                    'title': request.data['title'],
+                    'content': request.data['content']
+                })
 
-            return Response({
-                'message': '게시글 등록을 성공했습니다.'
-            }, status=status.HTTP_201_CREATED)
+            if post_serializer.is_valid(raise_exception=True):
+                post_serializer.save()
+
+                return Response({
+                    'message': '게시글 등록을 성공했습니다.'
+                }, status=status.HTTP_201_CREATED)
         return Response({
             'message': '게시글 등록을 실패했습니다.'
         }, status=status.HTTP_400_BAD_REQUEST)
 
-
-class PostView(APIView):
-    permission_classes = (IsAuthenticated,)
-
-    def delete(self, request):
+    def delete(self, request, post_id):
         user_id = get_user_id_from_token(request.META['HTTP_AUTHORIZATION'].split()[1])
 
         try:
