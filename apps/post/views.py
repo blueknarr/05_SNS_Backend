@@ -6,13 +6,44 @@ from rest_framework.views import APIView
 from rest_framework import status
 
 from post.models import Post
-from post.serializers import PostCreateSerializer, PostPatchSerializer
-from post.utils.utils import get_user_id_from_token
-from user.models import User
+from post.serializers import (
+    PostCreateSerializer,
+    PostPatchSerializer,
+    PostDetailSerializer,
+    PostListSerializer
+)
+from post.utils.utils import (
+    get_user_id_from_token,
+    get_post_detail
+)
 
 
 class PostView(APIView):
     permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        try:
+            post = Post.objects.all()
+            list_serializer = PostListSerializer(post, many=True)
+
+            res = []
+            for row in list_serializer.data:
+                res.append({
+                    '제목': row['title'],
+                    '작성자': row['writer'],
+                    '해시태그': '',
+                    '작성일': row['create_date'],
+                    '좋아요': row['like'],
+                    '조회수': row['view']
+                })
+
+            return Response({
+                '게시글 목록': res
+            }, status=status.HTTP_200_OK)
+        except Post.DoesNotExist:
+            return Response({
+                'message': f'게시글 목록을 가져올 수 없습니다.'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
     def post(self, request):
         user_id = get_user_id_from_token(request.META['HTTP_AUTHORIZATION'].split()[1])
@@ -33,6 +64,22 @@ class PostView(APIView):
                 }, status=status.HTTP_201_CREATED)
         return Response({
             'message': '게시글 등록을 실패했습니다.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PostDetailView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, post_id):
+        post = get_post_detail(post_id)
+
+        if post:
+            return Response({
+                'message': f'{post_id}번 게시글을 불러왔습니다.',
+                'post': PostDetailSerializer(post).data
+            }, status=status.HTTP_200_OK)
+        return Response({
+            'message': f'{post_id}번 게시글이 없습니다.'
         }, status=status.HTTP_400_BAD_REQUEST)
 
     def patch(self, request, post_id):
