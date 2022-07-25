@@ -116,3 +116,51 @@ class PostDetailView(APIView):
                 'message': f'{post_id}번 게시글을 삭제할 수 없습니다.'
             }, status=status.HTTP_400_BAD_REQUEST)
 
+
+class PostRestoreView(APIView):
+    def get(self, request):
+        user_id = get_user_id_from_token(request.META['HTTP_AUTHORIZATION'].split()[1])
+
+        if user_id == request.user.id:
+            deleted_posts = Post.deleted_objects.filter(user_id=user_id).all()
+            deleted_serializer = PostDetailSerializer(deleted_posts, many=True)
+
+            res = []
+            for row in deleted_serializer.data:
+                res.append({
+                    'id': row['id'],
+                    'title': row['title'],
+                    'writer': row['writer'],
+                    'content': row['content'],
+                    'like': row['like'],
+                    'view': row['view'],
+                    'create_date': row['create_date'],
+                    'modify_date': row['modify_date'],
+                    'is_deleted': row['is_deleted']
+                })
+            return Response({
+                'message': f'{request.user.user_name}의 휴지통에 있는 게시글 목록을 가져왔습니다.',
+                'data': res
+            }, status=status.HTTP_200_OK)
+        return Response({
+            'message': f'{request.user.user_name}의 휴지통에 있는 게시글 목록을 가져오지 못했습니다.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, post_id):
+        user_id = get_user_id_from_token(request.META['HTTP_AUTHORIZATION'].split()[1])
+
+        try:
+            post = Post.deleted_objects.get(id=post_id)
+
+            if user_id == request.user.id:
+                post.restore()
+                restore_serializer = PostDetailSerializer(post)
+
+                return Response({
+                    'message': f'{post_id}번 게시글을 복원했습니다.',
+                    'data': restore_serializer.data
+                }, status=status.HTTP_200_OK)
+        except Post.DoesNotExist:
+            return Response({
+                'message': f'{post_id}번 게시글을 복원 할 수 없습니다.'
+            }, status=status.HTTP_400_BAD_REQUEST)

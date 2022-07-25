@@ -34,7 +34,7 @@ class PostPatchSerializer(serializers.ModelSerializer):
 class PostDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
-        fields = ['id', 'title', 'writer', 'content', 'like', 'view', 'create_date', 'modify_date']
+        fields = ['id', 'title', 'writer', 'content', 'like', 'view', 'create_date', 'modify_date', 'is_deleted']
 
 
 class PostListSerializer(serializers.ModelSerializer):
