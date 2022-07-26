@@ -15,8 +15,7 @@ from post.serializers import (
 from post.utils.utils import (
     get_user_id_from_token,
     get_post_detail,
-    set_post_like_cnt,
-    split_and_insert_hashtag
+    set_post_like_cnt
 )
 
 
@@ -33,9 +32,9 @@ class PostView(APIView):
                 res.append({
                     '제목': row['title'],
                     '작성자': row['writer'],
-                    '해시태그': row['hashtag'],
+                    #'해시태그': row['hashtag'],
                     '작성일': row['create_date'],
-                    '좋아요': row['like'],
+                    #'좋아요': row['like'],
                     '조회수': row['view']
                 })
 
@@ -60,7 +59,6 @@ class PostView(APIView):
 
             if create_serializer.is_valid(raise_exception=True):
                 create_serializer.save()
-                split_and_insert_hashtag(request.data['tags'], create_serializer.data['id'])
 
                 return Response({
                     'message': '게시글을 등록했습니다.'
@@ -172,6 +170,7 @@ class PostRestoreView(APIView):
 class PostLikeView(APIView):
     def post(self, request, post_id):
         msg = set_post_like_cnt(request.data['sel'], request.user.id, post_id)
+
         return Response({
             'message': msg
         }, status=status.HTTP_200_OK)
