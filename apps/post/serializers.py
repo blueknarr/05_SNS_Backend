@@ -14,7 +14,7 @@ class PostCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['user', 'title', 'content']
+        fields = ['id', 'user', 'title', 'content']
 
 
 class PostPatchSerializer(serializers.ModelSerializer):
