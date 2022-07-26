@@ -16,6 +16,7 @@ from post.utils.utils import (
     get_user_id_from_token,
     get_post_detail,
     set_post_like_cnt,
+    split_and_insert_hashtag
 )
 
 
@@ -59,7 +60,7 @@ class PostView(APIView):
 
             if create_serializer.is_valid(raise_exception=True):
                 create_serializer.save()
-                #split_and_insert_hashtag(request.data['hashtag'])
+                split_and_insert_hashtag(request.data['tags'], create_serializer.data['id'])
 
                 return Response({
                     'message': '게시글을 등록했습니다.'

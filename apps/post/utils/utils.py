@@ -1,7 +1,7 @@
 import jwt
 
 from sns.settings import SIMPLE_JWT
-from post.models import Post, PostLike
+from post.models import Post, PostLike, PostTag
 
 
 def get_user_id_from_token(token):
@@ -39,3 +39,13 @@ def set_post_like_cnt(sel, user_id, post_id):
         msg = f'{post_id}번 게시글의 좋아요를 취소했습니다.'
 
     return msg
+
+
+def split_and_insert_hashtag(tags, id):
+    tags = tags.split(',')
+    print(id)
+    post = Post.objects.get(id=id)
+
+    for tag in tags:
+        PostTag.objects.get_or_create(post=post, tag=tag)
+
