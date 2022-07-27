@@ -59,11 +59,23 @@ def set_hash_tag(post_id, tags):
         post.hashtag.add(tag)
 
 
-def get_hash_tag(post_id, is_deleted=False):
+def get_hash_tag(post_id, is_deleted=False, filter_tags=None):
     if is_deleted:
         post = Post.deleted_objects.get(id=post_id)
     else:
         post = Post.objects.get(id=post_id)
-    tags = post.hashtag.all()
 
-    return [row.tag for row in tags]
+    tags = post.hashtag.all()
+    if filter_tags:
+        filtered = dict.fromkeys(filter_tags.split(','), True)
+
+        cnt = 0
+        for row in tags:
+            hash_tag = row.tag[1:]
+            if row.tag[1:] in filtered:
+                cnt+=1
+        if cnt != len(filtered):
+            return False
+
+    res = [row.tag for row in tags]
+    return res
