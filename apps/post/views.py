@@ -15,7 +15,10 @@ from post.serializers import (
 from post.utils.utils import (
     get_user_id_from_token,
     get_post_detail,
-    set_post_like_cnt
+    set_post_like_cnt,
+    get_post_like_cnt,
+    set_hash_tag,
+    get_hash_tag
 )
 
 
@@ -29,13 +32,17 @@ class PostView(APIView):
 
             res = []
             for row in list_serializer.data:
+                tag = get_hash_tag(row['id'])
+                like = get_post_like_cnt(row['id'])
+
                 res.append({
+                    '게시글 번호': row['id'],
                     '제목': row['title'],
                     '작성자': row['writer'],
-                    #'해시태그': row['hashtag'],
+                    '해시태그': tag,
+                    '좋아요': like,
+                    '조회수': row['view'],
                     '작성일': row['create_date'],
-                    #'좋아요': row['like'],
-                    '조회수': row['view']
                 })
 
             return Response({
@@ -60,6 +67,7 @@ class PostView(APIView):
             if create_serializer.is_valid(raise_exception=True):
                 create_serializer.save()
 
+                set_hash_tag(create_serializer.data['id'], request.data['tags'])
                 return Response({
                     'message': '게시글을 등록했습니다.'
                 }, status=status.HTTP_201_CREATED)
@@ -74,10 +82,26 @@ class PostDetailView(APIView):
     def get(self, request, post_id):
         post = get_post_detail(post_id)
 
+        tag = get_hash_tag(PostDetailSerializer(post).data['id'])
+        like = get_post_like_cnt(PostDetailSerializer(post).data['id'])
+
+        res = {
+            '게시글 번호': PostDetailSerializer(post).data['id'],
+            '제목': PostDetailSerializer(post).data['title'],
+            '작성자': PostDetailSerializer(post).data['writer'],
+            '본문': PostDetailSerializer(post).data['content'],
+            '해시태그': tag,
+            '좋아요': like,
+            '조회수': PostDetailSerializer(post).data['view'],
+            '작성 날짜': PostDetailSerializer(post).data['create_date'],
+            '수정 날짜': PostDetailSerializer(post).data['modify_date'],
+            '삭제 유무': PostDetailSerializer(post).data['is_deleted']
+        }
+
         if post:
             return Response({
                 'message': f'{post_id}번 게시글을 불러왔습니다.',
-                'post': PostDetailSerializer(post).data
+                'post': res
             }, status=status.HTTP_200_OK)
         return Response({
             'message': f'{post_id}번 게시글이 없습니다.'
@@ -128,16 +152,20 @@ class PostRestoreView(APIView):
 
             res = []
             for row in deleted_serializer.data:
+                tag = get_hash_tag(row['id'], row['is_deleted'])
+                like = get_post_like_cnt(row['id'], row['is_deleted'])
+
                 res.append({
-                    'id': row['id'],
-                    'title': row['title'],
-                    'writer': row['writer'],
-                    'content': row['content'],
-                    'like': row['like'],
-                    'view': row['view'],
-                    'create_date': row['create_date'],
-                    'modify_date': row['modify_date'],
-                    'is_deleted': row['is_deleted']
+                    '게시글 번호': row['id'],
+                    '제목': row['title'],
+                    '작성자': row['writer'],
+                    '본문': row['content'],
+                    '해시태그': tag,
+                    '좋아요': like,
+                    '조회수': row['view'],
+                    '작성 날짜': row['create_date'],
+                    '수정 날짜': row['modify_date'],
+                    '삭제 유무': row['is_deleted']
                 })
             return Response({
                 'message': f'{request.user.user_name}의 휴지통에 있는 게시글 목록을 가져왔습니다.',
