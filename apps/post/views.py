@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
-
+from django.core.paginator import Paginator
 from post.models import Post
 from post.serializers import (
     PostCreateSerializer,
@@ -27,12 +27,41 @@ class PostView(APIView):
 
     def get(self, request):
         try:
-            post = Post.objects.all()
+            # 1. 정렬 - like, view, create_date
+            order_by = '-create_date'
+            if request.GET.get('orderBy'):
+                order_by = request.GET.get('orderBy')
+
+            post = Post.objects.all().order_by(order_by)
+
+            # 2. 검색 - like
+            if request.GET.get('search'):
+                post = post.all().filter(title__contains=request.GET.get('search'))
+
+            # 3. filtering
+            filter_tags = False
+            if request.GET.get('hashtags'):
+                filter_tags = request.GET.get('hashtags')
+
+            # 4. paginator
+            page_cnt = 10
+            if request.GET.get('paginator'):
+                page_cnt = int(request.GET.get('paginator'))
+            paginator = Paginator(post, page_cnt)
+
+            page=1
+            if request.GET.get('page'):
+                page = int(request.GET.get('page'))
+            post = paginator.get_page(page)
+
             list_serializer = PostListSerializer(post, many=True)
 
             res = []
             for row in list_serializer.data:
-                tag = get_hash_tag(row['id'])
+                tag = get_hash_tag(row['id'], filter_tags=filter_tags)
+                if not tag:
+                    continue
+
                 like = get_post_like_cnt(row['id'])
 
                 res.append({
