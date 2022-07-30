@@ -26,6 +26,15 @@ class PostView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):
+        '''
+        게시글 목록 가져오기 - 쿼리 스트링으로 4가지 옵션 선택
+        1. 정렬 - default: -create_date (view, like)
+        2. 검색 - 키워드로 filtering
+        3. 해시태그 검색 - 키워드로 filtering
+        4. pagination
+        :param request: String
+        :return: JSON
+        '''
         try:
             # 1. 정렬 - like, view, create_date
             order_by = '-create_date'
@@ -34,11 +43,11 @@ class PostView(APIView):
 
             post = Post.objects.all().order_by(order_by)
 
-            # 2. 검색 - like
+            # 2. 검색 - 키워드를 입력받아 filtering
             if request.GET.get('search'):
                 post = post.all().filter(title__contains=request.GET.get('search'))
 
-            # 3. filtering
+            # 3. 해시 태그 검색 - 키워드를 입력받아 filtering
             filter_tags = False
             if request.GET.get('hashtags'):
                 filter_tags = request.GET.get('hashtags')
@@ -83,6 +92,11 @@ class PostView(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
     def post(self, request):
+        '''
+        게시글 등록
+        :param request: String
+        :return: JSON
+        '''
         user_id = get_user_id_from_token(request.META['HTTP_AUTHORIZATION'].split()[1])
 
         if user_id == request.user.id:
@@ -109,6 +123,11 @@ class PostDetailView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, post_id):
+        '''
+        게시글 목록 가져오기
+        :param post_id: Int
+        :return: JSON
+        '''
         post = get_post_detail(post_id)
 
         tag = get_hash_tag(PostDetailSerializer(post).data['id'])
@@ -137,6 +156,12 @@ class PostDetailView(APIView):
         }, status=status.HTTP_400_BAD_REQUEST)
 
     def patch(self, request, post_id):
+        '''
+        게시글 수정
+        :param request: String
+        :param post_id: Int
+        :return: JSON
+        '''
         user_id = get_user_id_from_token(request.META['HTTP_AUTHORIZATION'].split()[1])
 
         if user_id == request.user.id:
@@ -154,6 +179,12 @@ class PostDetailView(APIView):
         }, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, post_id):
+        '''
+        게시글 삭제
+        :param request: String
+        :param post_id: Int
+        :return: JSON
+        '''
         user_id = get_user_id_from_token(request.META['HTTP_AUTHORIZATION'].split()[1])
 
         try:
@@ -173,6 +204,11 @@ class PostDetailView(APIView):
 
 class PostRestoreView(APIView):
     def get(self, request):
+        '''
+        휴지통에 있는 게시글 목록
+        :param request: String
+        :return: JSON
+        '''
         user_id = get_user_id_from_token(request.META['HTTP_AUTHORIZATION'].split()[1])
 
         if user_id == request.user.id:
@@ -205,6 +241,12 @@ class PostRestoreView(APIView):
         }, status=status.HTTP_400_BAD_REQUEST)
 
     def patch(self, request, post_id):
+        '''
+        휴지통에 있는 게시글 복원
+        :param request: String
+        :param post_id: Int
+        :return: JSON
+        '''
         user_id = get_user_id_from_token(request.META['HTTP_AUTHORIZATION'].split()[1])
 
         try:
@@ -226,6 +268,13 @@ class PostRestoreView(APIView):
 
 class PostLikeView(APIView):
     def post(self, request, post_id):
+        '''
+        좋아요, 좋아요 취소 기능을 하는 api
+        좋아요 중복 불가
+        :param request: String
+        :param post_id: Int
+        :return: JSON
+        '''
         msg = set_post_like_cnt(request.data['sel'], request.user.id, post_id)
 
         return Response({

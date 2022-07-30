@@ -15,6 +15,11 @@ class UserView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def delete(self, request):
+        '''
+        회원 탈퇴
+        :param request: String
+        :return: JSON
+        '''
         try:
             user = User.objects.get(email=request.data['email'])
             user.delete()
@@ -30,6 +35,11 @@ class UserView(APIView):
 
 class UserLoginView(APIView):
     def post(self, request):
+        '''
+        로그인 후 access token 발급
+        :param request: String
+        :return: JSON
+        '''
         user = authenticate(email=request.data['email'], password=request.data['password'])
 
         if user is not None:
@@ -47,6 +57,11 @@ class UserCreateView(APIView):
     serializer_class = UserCreateSerializer
 
     def post(self, request):
+        '''
+        회원가입
+        :param request: String
+        :return: JSON
+        '''
         serializer = self.serializer_class(data=request.data)
 
         if serializer.is_valid(raise_exception=True):
