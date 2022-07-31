@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase, Client
 
+
 class PostsTest(TestCase):
     @classmethod
     def setUpTestData(cls):
