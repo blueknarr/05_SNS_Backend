@@ -22,9 +22,12 @@
   - 사용자는 본 서비스에 접속하여, 게시물을 업로드 하거나 다른 사람의 게시물을 확인하고, 좋아요를 누를 수 있습니다.
       - DRF를 통한 RESTful API 서버 개발
       - JTW 토큰 발급 - 사용자 인증과 게시글 등록, 수정, 삭제, 복원 요청에 사용
-          - Permission을 이용하여 권한 부여  
+          - Permission을 이용하여 권한 부여
+      - 게시글 목록 - Ordering (= Sorting, 정렬), Searching (= 검색), Filtering (= 필터링), Pagination (= 페이지 기능)
       - Soft Delete 사용 
         - 게시글을 삭제 요청 시 DB에서 바로 삭제하지 않고 임시로 삭제된 상태로 변경
+        - Soft Delete 게시글 복원 기능
+      - EC2에 Docker-Compose로 Django + Nginx + gunicorn, MySql을 배포
 
 <br>
 <br>
@@ -34,6 +37,11 @@
 <img src="https://user-images.githubusercontent.com/44389424/181764366-63f7db23-c4c0-4e95-bce1-80ffef3e1293.jpg"/>
 
 <br>
+<br>
+
+### Docker
+
+<img src="https://user-images.githubusercontent.com/44389424/182169557-74d75617-74cc-4111-a8a8-69f1f3ee6fe8.JPG"/>
 <br>
 
 ### ERD
