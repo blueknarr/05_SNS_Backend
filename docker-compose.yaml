@@ -47,6 +47,6 @@ services:
     volumes:
       - ./apps:/app
     env_file:
-      - ./apps/.env
+      - ../ably_test/apps/.env
     restart: always
     entrypoint: ./wait-for-it.sh db_host:3306 --
